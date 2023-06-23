@@ -1,0 +1,196 @@
+<?php 
+    include("conex.php");
+
+    if(isset($_POST["registro"])){
+        if(!empty($_POST['nombre']) && !empty($_POST['apellidos']) && !empty($_POST['user']) && !empty($_POST['email']) && !empty($_POST['password'])){
+            $email = $_POST['email'];
+            $nombre = $_POST['nombre'];
+            $apellido = $_POST['apellidos'];
+            $user = $_POST['user'];
+            $password = $_POST['password'];
+    
+            if(mysqli_connect_error()){
+                die('connect error('.mysqli_connect_errno().')'.myslqi_connect_error());
+            }else{
+                $SELECT = "SELECT email from users where email = ? limit 1";
+                // $INSERT = "INSERT INTO users (email, password, name, lastname, school)values(?,?,?,?,?)";
+                $INSERT = "INSERT INTO users (nombre, apellidos, user, email, password)values(?,?,?,?,?)";
+    
+                $stmt = $conn ->prepare($SELECT);
+                $stmt ->bind_param("s",$email);
+                $stmt ->execute();
+                $stmt ->bind_result($email);
+                $stmt ->store_result();
+    
+                    //apilar datos en la bd
+                $rnum = $stmt->num_rows;
+    
+                if($rnum == 0){
+                    //sellar la conexion de base de datos pero que este abierta
+                    $stmt ->close();
+                        
+                    $stmt = $conn->prepare($INSERT);
+                    // $stmt ->bind_param("sssss", $email,$password,$nombre,$apellido,$user);
+                    $stmt ->bind_param("sssss", $nombre,$apellido,$user,$email,$password);
+                    $stmt ->execute();
+                    ?>
+                    <div class = "ok">
+                        <h4>Felicidades</h4>
+                        <h1 id= "regGD">¡TE HAS REGISTRADO CORRECTAMENTE!</h1>
+                        <h4>Vuelve a la página principal y inicia sesión</h4>
+                    </div>
+                    <?php  
+
+                    $asunto = "Confirmacion de cuenta HangmanGame";
+
+                    $carta = "Hola, $nombre \n";
+                    $carta .= "¡Bienvenido a Hangman Game! \n";
+                    $carta .= "Acabamos de dar de alta tu cuenta, Gracias por elegir este software para aprender \n";
+                    $carta .= "Aqui podras aprender el pasado de los verbos regulares e irregulares jugando, puedes crear en modo arena competitivamente ¡Ademas de que puedes crear tus propias salas con verbos personalizados! \n";
+                    $carta .= "Tambien aqui te dejamos el manual de usuario del software. \n";
+                    $carta .= "Manual de Usuario: \n";
+                    $carta .= "Manual de instalacion: \n";
+                    
+
+                    // Enviando Mensaje
+                    mail($email, $asunto, $carta);
+                    // header('in.html');
+                }else{
+                    ?>
+                    <div class = "bad">
+                        <h4>Error al registrarte</h4>
+                        <h1 id= "regBD">ALGUIEN YA REGISTRO ESE EMAIL</h1>
+                    </div>
+                    <?php 
+                }
+                $stmt -> close();
+                $conn -> close();
+            }
+        }else{
+            ?>
+            <div class = "bad">
+                <h4>error al registrarte</h4>
+                <h1 id= "regBD">TODOS LOS DATOS SON OBLIGATORIOS</h1>
+            </div>
+            <?php 
+            die();
+        }
+    }
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./css/style.css">
+    <link rel="stylesheet" href="./css/font-awesome.css">
+    <title>Inicia sesion</title>
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <a href="./index.html">
+                <img src="./img/icons8-motherboard-96.png" alt="logo" width="50">
+            </a>
+        </div>
+        <nav>
+            <a href="#inicia">Inicia Sesion</a>
+            <a href="#registro">Registrate</a>
+        </nav>
+    </header>
+    <main>
+        <div class="content">
+            <div id="inicio" class="inicio">
+                Bienvenido!
+                <a href="#">Juega</a>
+                <a href="#inicia">Inicia Sesion</a>
+                <a href="#registro">Registrate</a>
+            </div>
+            <div id="inicia" class="inicia">
+                <div class="div-form">
+                    <fieldset>
+                        <legend>Inicia Sesion</legend>
+                        <form method="post">
+
+
+
+                            <div class="input-group">
+                                <label class="label">Usuario</label>
+                                <input autocomplete="off" name="user" id="usuario" class="input" type="text" required>
+                                <div></div>
+                            </div>
+                            <div class="input-group">
+                                <label class="label">Contraseña</label>
+                                <input autocomplete="off" name="password" id="contraseña" class="input" type="password" required>
+                                <div></div>
+                            </div>
+
+                            <input type="submit" value="Inicia Sesión">
+                        </form>
+                    </fieldset>
+                </div>
+            </div>
+            <div id="registro" class="registro">
+                <div class="div-form">
+                    <fieldset>
+                        <legend>Registrate</legend>
+                        <form method="post">
+                            <label for="nombre">Nombre</label> <br>
+                            <input type="text" id="nombre" name="nombre" placeholder="Introduce tu nombre" required> <br>
+                            
+                            <label for="apellidos">Apellido(s)</label> <br>
+                            <input type="text" id="apellidos" name="apellidos" placeholder="Introduce tu apellido" required> <br>
+                            
+                            <label for="usuario">Usuario</label> <br>
+                            <input type="text" id="usuario" name="user" placeholder="Crea tu usuario" required> <br>
+                            
+                            <label for="email">Email</label> <br>
+                            <input type="email" id="email" name="email" placeholder="Introduce tu email" required> <br>
+
+                            <label for="contraseña">Contraseña</label> <br>
+                            <input type="password" id="contraseña" name="password" placeholder="Crea tu contraseña" required><br>
+                            
+                            <label for="comf">Comfirma contraseña</label> <br>
+                            <input type="password" id="comf" placeholder="Confirma tu contraseña" required><br>
+                            
+                            <input type="submit" class="formSubmit" name="registro" value="Resgistrar">
+                        </form>
+                    </fieldset>
+                </div>
+            </div>
+        </div>
+    </main>
+    <footer>
+        <div class="conteiner-footer">
+            <div class="box-footer">
+                <div class="terms">
+                    <h2>Desarrollador</h2>
+                    <p>Angela Flores Diaz</p>
+                    <p>4 "C"</p>
+                </div>
+            </div>
+            <div class="box-footer">
+                <h2>Contacto</h2>
+                <p><strong>email:</strong> angelafloxz@gmail.com</p>
+                <p><strong>telefono:</strong> 560 000 0000</p>
+            </div>
+            <div class="box-footer">
+                <h2>Redes Sociales</h2>
+                <a href="https://www.facebook.com/profile.php?id=100021329146433&mibextid=ZbWKwL"><i class="fab fa-facebook-square"></i>Facebook</a>
+                <a href="https://twitter.com/F1oxyz"><i class="fab fa-twitter-square"></i>Twitter</a>
+                <a href="https://www.linkedin.com/in/angela-flores-7b34b0259"><i class="fab fa-linkedin"></i>Linkedin</a>
+                <a href="https://www.instagram.com/a.floxyz"><i class="fab fa-instagram-square"></i>Instagram</a>
+                <a href="https://github.com/F1oxyz"><i class="bi bi-github"></i>Github</a>
+            </div>
+        </div>
+        <div class="box-copyright">
+            <hr>
+            <p>
+                Todos los derechos reservados © 2023
+                <b>Angela Flores</b>
+            </p>
+        </div>
+    </footer>
+</body>
+</html>
